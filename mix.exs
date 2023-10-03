@@ -19,8 +19,9 @@ defmodule TablecheckDataOp.MixProject do
 
   def deps do
     [
-      # TBD: CSV parser/writer, Flow
-      {:csv, "~> 3.2"}
+      {:csv, "~> 3.2"},
+      {:nimble_csv, "~> 1.2"},
+      {:flow, "~> 1.2"}
     ]
   end
 end
