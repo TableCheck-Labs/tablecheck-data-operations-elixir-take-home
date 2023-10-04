@@ -11,73 +11,21 @@ defmodule TablecheckDataOp do
   Total time (reading and processing data) with Flow: 150ms for 150,000 rows.
   """
 
-  alias NimbleCSV.RFC4180, as: CSV
+  alias TablecheckDataOp.Processor
   alias TablecheckDataOp.Stats
 
   def run do
-    with dataset <- read_dataset(),
-         data <- process_dataset(dataset),
+    with {:ok, data} <- Processor.run(),
          stats <- Stats.build(data) do
       {:ok, stats}
     end
   end
 
-  def read_dataset do
-    dataset_csv()
-    |> File.stream!()
-    |> Stream.drop(1)
-    |> Flow.from_enumerable()
-    |> Flow.map(&parse_csv_row/1)
-  end
 
-  defp parse_csv_row(row) do
-    row
-    |> CSV.parse_string(skip_headers: false)
-    |> parse_row_data()
-  end
 
-  defp parse_row_data([[restaraunt, dish, customer, cost_binary]]) do
-    {cost, _} = Float.parse(cost_binary)
 
-    %{
-      restaraunt: restaraunt,
-      dish: dish,
-      customer: customer,
-      cost: cost
-    }
-  end
 
-  @default_stats %{
-    total_customers: 0,
-    total_revenue: 0,
-    dishes: %{},
-    customers: %{}
-  }
-
-  def process_dataset(data) do
-    data
-    |> Flow.partition(key: {:key, :restaraunt})
-    |> Flow.reduce(fn -> %{} end, fn item, acc ->
-      Map.update(acc, item.restaraunt, @default_stats, fn stats ->
-        stats
-        |> Map.update!(:total_customers, &(&1 + 1))
-        |> Map.update!(:total_revenue, &(&1 + item.cost))
-        |> Map.update!(:dishes, fn dacc ->
-          Map.update(dacc, item.dish, {0, 0}, fn {counts, cost} ->
-            {counts + 1, cost + item.cost}
-          end)
-        end)
-        |> Map.update!(:customers, fn dacc ->
-          Map.update(dacc, item.customer, {0, 0}, fn {counts, cost} ->
-            {counts + 1, cost + item.cost}
-          end)
-        end)
-      end)
     end)
-    |> Enum.into(%{})
-  end
 
-  def dataset_csv do
-    Application.app_dir(:dataop, "/priv/data.csv")
   end
 end
