@@ -1,4 +1,4 @@
-defmodule TablecheckDataOp.Generator do
+defmodule DataOp.Generator do
   @moduledoc "Generate test data."
 
   @restaurant_names [

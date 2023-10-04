@@ -1,4 +1,4 @@
-defmodule TablecheckDataOp.MixProject do
+defmodule DataOp.MixProject do
   use Mix.Project
 
   def project do

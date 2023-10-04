@@ -1,6 +1,6 @@
 # TableCheck Data Operations (Elixir Developer) - Take Home Project
 
-Take a look at the dataset located in `/data/data.csv`. Your goal is to interpret it and create an API that can answer the following questions:
+Take a look at the dataset located in `/priv/data.csv`. Your goal is to interpret it and create an API that can answer the following questions:
   - [ ] How many customers visited the "Restaurant at the end of the universe"?
   - [ ] How much money did the "Restaurant at the end of the universe" make?
   - [ ] What was the most popular dish at each restaurant?

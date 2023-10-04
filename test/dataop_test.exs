@@ -1,9 +1,9 @@
 defmodule DataOpTest do
   use ExUnit.Case
 
-  alias TablecheckDataOp, as: DataOp
+  alias DataOp, as: DataOp
 
   test ".run/1 returns :ok" do
-    assert DataOp.run() == :ok
+    assert {:ok, %{}} = DataOp.run()
   end
 end

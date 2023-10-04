@@ -1,4 +1,4 @@
-defmodule TablecheckDataOp do
+defmodule DataOp do
   @moduledoc """
   TableCheck Data Operations (Elixir Developer) - Take Home Project.
 
@@ -11,8 +11,8 @@ defmodule TablecheckDataOp do
   Total time (reading and processing data) with Flow: 150ms for 150,000 rows.
   """
 
-  alias TablecheckDataOp.Processor
-  alias TablecheckDataOp.Stats
+  alias DataOp.Processor
+  alias DataOp.Stats
 
   def run do
     with {:ok, data} <- Processor.run(),

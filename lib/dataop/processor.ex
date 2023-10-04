@@ -1,4 +1,4 @@
-defmodule TablecheckDataOp.Processor do
+defmodule DataOp.Processor do
   @moduledoc """
   TableCheck Data Operations (Elixir Developer) - Take Home Project.
 

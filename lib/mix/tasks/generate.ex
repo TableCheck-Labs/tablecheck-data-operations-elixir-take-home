@@ -7,7 +7,7 @@ defmodule Mix.Tasks.Generate do
   @impl Mix.Task
   def run(_args) do
     Mix.shell().info("Generating test data...")
-    TablecheckDataOp.Generator.run()
+    DataOp.Generator.run()
     Mix.shell().info("done!")
   end
 end

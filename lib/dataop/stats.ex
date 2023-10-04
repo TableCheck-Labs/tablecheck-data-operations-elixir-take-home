@@ -1,4 +1,4 @@
-defmodule TablecheckDataOp.Stats do
+defmodule DataOp.Stats do
   @moduledoc """
   Process per-restaraunt stats and API to access stats:
 
