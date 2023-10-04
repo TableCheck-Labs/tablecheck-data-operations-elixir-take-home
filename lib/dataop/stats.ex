@@ -81,10 +81,58 @@ defmodule TablecheckDataOp.Stats do
 
   def total_customers_for(stats, restaraunt), do: stats[restaraunt].total_customers
   def total_revenue_for(stats, restaraunt), do: stats[restaraunt].total_revenue
-  def most_poular_dish_for(stats, restaraunt), do: stats[restaraunt].most_popular_dish
+  def most_popular_dish_for(stats, restaraunt), do: stats[restaraunt].most_popular_dish
   def most_profitable_dish_for(stats, restaraunt), do: stats[restaraunt].most_profitable_dish
   def most_visited_customer_for(stats, restaraunt), do: stats[restaraunt].most_visited_customer
 
   def most_profitable_customer_for(stats, restaraunt),
     do: stats[restaraunt].most_profitable_customer
+
+  def restaraunts(stats), do: Map.keys(stats)
+
+  def total_customers(stats) do
+    stats
+    |> restaraunts()
+    |> Enum.map(fn name -> total_customers_for(stats, name) end)
+    |> Enum.sum()
+  end
+
+  def total_revenue(stats) do
+    stats
+    |> restaraunts()
+    |> Enum.map(fn name -> total_revenue_for(stats, name) end)
+    |> Enum.sum()
+  end
+
+  def top_visited_restaraunts(stats, n \\ 5) do
+    top_n_by(stats, n, &total_customers_for/2)
+  end
+
+  def top_profitable_restaraunts(stats, n \\ 5) do
+    top_n_by(stats, n, &total_revenue_for/2)
+  end
+
+  def top_popular_dishes(stats, n \\ 5) do
+    top_n_by(stats, n, &most_popular_dish_for/2, &elem(&1, 1))
+  end
+
+  def top_profitable_dishes(stats, n \\ 5) do
+    top_n_by(stats, n, &most_profitable_dish_for/2, &elem(&1, 1))
+  end
+
+  def top_visited_customers(stats, n \\ 5) do
+    top_n_by(stats, n, &most_visited_customer_for/2, &elem(&1, 1))
+  end
+
+  def top_profitable_customers(stats, n \\ 5) do
+    top_n_by(stats, n, &most_profitable_customer_for/2, &elem(&1, 1))
+  end
+
+  defp top_n_by(stats, n, value_func, sort_by_func \\ & &1) do
+    stats
+    |> restaraunts()
+    |> Enum.map(fn name -> {name, value_func.(stats, name)} end)
+    |> Enum.sort_by(fn {_name, value} -> sort_by_func.(value) end, :desc)
+    |> Enum.take(n)
+  end
 end
