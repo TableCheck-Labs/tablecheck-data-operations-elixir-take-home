@@ -12,14 +12,14 @@ defmodule TablecheckDataOp do
   """
 
   alias NimbleCSV.RFC4180, as: CSV
+  alias TablecheckDataOp.Stats
 
   def run do
-    data =
-      read_dataset()
-      |> process_dataset()
-      |> Enum.into(%{})
-
-    {:ok, data}
+    with dataset <- read_dataset(),
+         data <- process_dataset(dataset),
+         stats <- Stats.build(data) do
+      {:ok, stats}
+    end
   end
 
   def read_dataset do
@@ -50,13 +50,10 @@ defmodule TablecheckDataOp do
   @default_stats %{
     total_customers: 0,
     total_revenue: 0,
-    dishes_count: %{},
-    dishes_cost: %{},
-    customers_count: %{}
+    dishes: %{},
+    customers: %{}
   }
 
-  # TODO: maybe instead one-pass split into many data-consumer-producers and
-  # process data separataly with Flow.group_by/2? Could be more readable.
   def process_dataset(data) do
     data
     |> Flow.partition(key: {:key, :restaraunt})
@@ -65,17 +62,19 @@ defmodule TablecheckDataOp do
         stats
         |> Map.update!(:total_customers, &(&1 + 1))
         |> Map.update!(:total_revenue, &(&1 + item.cost))
-        |> Map.update!(:dishes_count, fn dacc ->
-          Map.update(dacc, item.dish, 0, &(&1 + 1))
+        |> Map.update!(:dishes, fn dacc ->
+          Map.update(dacc, item.dish, {0, 0}, fn {counts, cost} ->
+            {counts + 1, cost + item.cost}
+          end)
         end)
-        |> Map.update!(:dishes_cost, fn dacc ->
-          Map.update(dacc, item.dish, 0, &(&1 + item.cost))
-        end)
-        |> Map.update!(:customers_count, fn cacc ->
-          Map.update(cacc, item.customer, 0, &(&1 + 1))
+        |> Map.update!(:customers, fn dacc ->
+          Map.update(dacc, item.customer, {0, 0}, fn {counts, cost} ->
+            {counts + 1, cost + item.cost}
+          end)
         end)
       end)
     end)
+    |> Enum.into(%{})
   end
 
   def dataset_csv do
