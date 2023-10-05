@@ -1,78 +1,15 @@
 defmodule DataOp.Stats do
-  @moduledoc """
-  Process per-restaraunt stats and API to access stats:
-
-  iex> stats = Stats.build(data)
-
-  iex> Stats.total_customers_for(stats, "my-fav-restaraunt")
-  1999
-
-  iex> Stats.total_revenue_for(stats, "my-fav-restaraunt")
-  59999.99
-
-  iex> Stats.most_popular_dish_for(stats, "my-fav-restaraunt")
-  {"curry", 1500}
-
-  iex> Stats.most_profitable_dish_for(stats, "my-fav-restaraunt")
-  {"curry", 49999.99}
-
-  iex> Stats.most_visited_customer_for(stats, "my-fav-restaraunt")
-  {"Crono-kun", 10000}
-
-  iex> Stats.most_profitable_customer_for(stats, "my-fav-restaraunt")
-  {"Crono-kun", 32500.0}
+  @moduledoc ~S"""
+  Generate more structable data from raw stats and provide API for accessing it.
   """
 
-  defmodule RestarauntStats do
-    @moduledoc """
-    Stats per restaraunt: total customers, total revenue, most popular dish,
-    most profitable dish, customer with most visits, customer with most spendings. 
-    """
+  alias DataOp.RestarauntStats
 
-    defstruct name: "",
-              total_customers: 0,
-              total_revenue: 0,
-              most_popular_dish: {},
-              most_profitable_dish: {},
-              most_visited_customer: {},
-              most_profitable_customer: {}
+  @type t :: %{restaraunt_name() => RestarauntStats.t()}
 
-    def build(name, data) do
-      %__MODULE__{}
-      |> Map.put(:name, name)
-      |> put_totals(data)
-      |> put_best_dish(data)
-      |> put_best_customer(data)
-    end
+  @typep restaraunt_name :: DataOp.restaraunt_name()
 
-    defp put_totals(stats, data) do
-      stats
-      |> Map.put(:total_customers, data.total_customers)
-      |> Map.put(:total_revenue, data.total_revenue)
-    end
-
-    defp put_best_dish(stats, data) do
-      {pname, {count, _}} = Enum.max_by(data.dishes, &by_count/1)
-      {rname, {_, cost}} = Enum.max_by(data.dishes, &by_cost/1)
-
-      stats
-      |> Map.put(:most_popular_dish, {pname, count})
-      |> Map.put(:most_profitable_dish, {rname, cost})
-    end
-
-    defp put_best_customer(stats, data) do
-      {cname, {count, _}} = Enum.max_by(data.customers, &by_count/1)
-      {rname, {_, cost}} = Enum.max_by(data.customers, &by_cost/1)
-
-      stats
-      |> Map.put(:most_visited_customer, {cname, count})
-      |> Map.put(:most_profitable_customer, {rname, cost})
-    end
-
-    defp by_count({_name, {count, _cost}}), do: count
-    defp by_cost({_name, {_count, cost}}), do: cost
-  end
-
+  @spec build(%{restaraunt_name() => RestarauntStats.raw_stats()}) :: t()
   def build(raw_stats) do
     Enum.reduce(raw_stats, %{}, fn {rname, rdata}, acc ->
       Map.put(acc, rname, RestarauntStats.build(rname, rdata))
@@ -104,35 +41,35 @@ defmodule DataOp.Stats do
     |> Enum.sum()
   end
 
-  def top_visited_restaraunts(stats, n \\ 5) do
-    top_n_by(stats, n, &total_customers_for/2)
+  def top_visited_restaraunts(stats, limit \\ 5) do
+    top_n_by(stats, limit, &total_customers_for/2)
   end
 
-  def top_profitable_restaraunts(stats, n \\ 5) do
-    top_n_by(stats, n, &total_revenue_for/2)
+  def top_profitable_restaraunts(stats, limit \\ 5) do
+    top_n_by(stats, limit, &total_revenue_for/2)
   end
 
-  def top_popular_dishes(stats, n \\ 5) do
-    top_n_by(stats, n, &most_popular_dish_for/2, &elem(&1, 1))
+  def top_popular_dishes(stats, limit \\ 5) do
+    top_n_by(stats, limit, &most_popular_dish_for/2, &elem(&1, 1))
   end
 
-  def top_profitable_dishes(stats, n \\ 5) do
-    top_n_by(stats, n, &most_profitable_dish_for/2, &elem(&1, 1))
+  def top_profitable_dishes(stats, limit \\ 5) do
+    top_n_by(stats, limit, &most_profitable_dish_for/2, &elem(&1, 1))
   end
 
-  def top_visited_customers(stats, n \\ 5) do
-    top_n_by(stats, n, &most_visited_customer_for/2, &elem(&1, 1))
+  def top_visited_customers(stats, limit \\ 5) do
+    top_n_by(stats, limit, &most_visited_customer_for/2, &elem(&1, 1))
   end
 
-  def top_profitable_customers(stats, n \\ 5) do
-    top_n_by(stats, n, &most_profitable_customer_for/2, &elem(&1, 1))
+  def top_profitable_customers(stats, limit \\ 5) do
+    top_n_by(stats, limit, &most_profitable_customer_for/2, &elem(&1, 1))
   end
 
-  defp top_n_by(stats, n, value_func, sort_by_func \\ & &1) do
+  defp top_n_by(stats, limit, value_func, sort_by_func \\ & &1) do
     stats
     |> restaraunts()
     |> Enum.map(fn name -> {name, value_func.(stats, name)} end)
     |> Enum.sort_by(fn {_name, value} -> sort_by_func.(value) end, :desc)
-    |> Enum.take(n)
+    |> Enum.take(limit)
   end
 end
