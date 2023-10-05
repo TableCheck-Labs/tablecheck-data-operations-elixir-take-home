@@ -16,14 +16,29 @@ defmodule DataOp.Stats do
     end)
   end
 
-  def total_customers_for(stats, restaraunt), do: stats[restaraunt].total_customers
-  def total_revenue_for(stats, restaraunt), do: stats[restaraunt].total_revenue
-  def most_popular_dish_for(stats, restaraunt), do: stats[restaraunt].most_popular_dish
-  def most_profitable_dish_for(stats, restaraunt), do: stats[restaraunt].most_profitable_dish
-  def most_visited_customer_for(stats, restaraunt), do: stats[restaraunt].most_visited_customer
+  def total_customers_for(stats, restaraunt) do
+    Map.fetch!(stats, restaraunt).total_customers
+  end
 
-  def most_profitable_customer_for(stats, restaraunt),
-    do: stats[restaraunt].most_profitable_customer
+  def total_revenue_for(stats, restaraunt) do
+    Map.fetch!(stats, restaraunt).total_revenue
+  end
+
+  def most_popular_dish_for(stats, restaraunt) do
+    Map.fetch!(stats, restaraunt).most_popular_dish
+  end
+
+  def most_profitable_dish_for(stats, restaraunt) do
+    Map.fetch!(stats, restaraunt).most_profitable_dish
+  end
+
+  def most_visited_customer_for(stats, restaraunt) do
+    Map.fetch!(stats, restaraunt).most_visited_customer
+  end
+
+  def most_profitable_customer_for(stats, restaraunt) do
+    Map.fetch!(stats, restaraunts).most_profitable_customer
+  end
 
   def restaraunts(stats), do: Map.keys(stats)
 
