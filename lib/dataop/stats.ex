@@ -37,7 +37,7 @@ defmodule DataOp.Stats do
   end
 
   def most_profitable_customer_for(stats, restaraunt) do
-    Map.fetch!(stats, restaraunts).most_profitable_customer
+    Map.fetch!(stats, restaraunt).most_profitable_customer
   end
 
   def restaraunts(stats), do: Map.keys(stats)

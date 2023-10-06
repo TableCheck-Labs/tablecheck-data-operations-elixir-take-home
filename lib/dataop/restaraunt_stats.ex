@@ -42,8 +42,6 @@ defmodule DataOp.RestarauntStats do
   @doc "Generate stats for restaraunt from raw stats."
   @spec build(String.t(), raw_stats()) :: t()
   def build(name, data) do
-    IO.inspect(data, label: "\n• DEBUG")
-
     struct!(__MODULE__, %{
       name: name,
       total_customers: data.total_customers,

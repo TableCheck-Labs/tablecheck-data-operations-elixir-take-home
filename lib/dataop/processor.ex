@@ -47,34 +47,37 @@ defmodule DataOp.Processor do
     }
   end
 
-  @default_stats %{
-    total_customers: 0,
-    total_revenue: 0,
-    dishes: %{},
-    customers: %{}
-  }
-
   def process_dataset(data) do
     data
     |> Flow.partition(key: {:key, :restaraunt})
     |> Flow.reduce(fn -> %{} end, fn item, acc ->
-      Map.update(acc, item.restaraunt, @default_stats, fn stats ->
-        stats
-        |> Map.update!(:total_customers, &(&1 + 1))
-        |> Map.update!(:total_revenue, &(&1 + item.cost))
-        |> Map.update!(:dishes, fn dacc ->
-          Map.update(dacc, item.dish, {0, 0}, fn {counts, cost} ->
-            {counts + 1, cost + item.cost}
-          end)
-        end)
-        |> Map.update!(:customers, fn dacc ->
-          Map.update(dacc, item.customer, {0, 0}, fn {counts, cost} ->
-            {counts + 1, cost + item.cost}
-          end)
-        end)
-      end)
+      initial_value =
+        %{
+          total_customers: 1,
+          total_revenue: item.cost,
+          dishes: %{item.dish => {1, item.cost}},
+          customers: %{item.customer => {1, item.cost}}
+        }
+
+      Map.update(acc, item.restaraunt, initial_value, fn stats -> update_stats(stats, item) end)
     end)
     |> Enum.into(%{})
+  end
+
+  defp update_stats(stats, item) do
+    stats
+    |> Map.update!(:total_customers, &(&1 + 1))
+    |> Map.update!(:total_revenue, &(&1 + item.cost))
+    |> Map.update!(:dishes, fn dacc ->
+      Map.update(dacc, item.dish, {1, item.cost}, fn {counts, cost} ->
+        {counts + 1, cost + item.cost}
+      end)
+    end)
+    |> Map.update!(:customers, fn dacc ->
+      Map.update(dacc, item.customer, {1, item.cost}, fn {counts, cost} ->
+        {counts + 1, cost + item.cost}
+      end)
+    end)
   end
 
   defp dataset_csv do
