@@ -1,6 +1,42 @@
 # TableCheck Data Operations (Elixir Developer) - Take Home Project
 
-Take a look at the dataset located in `/data/data.csv`. Your goal is to interpret it and create an API that can answer the following questions:
+Concurrently ingest data from CSV file and generate simple statistics using [Flow](https://hexdocs.pm/flow/Flow.html).
+
+## Installation
+
+```
+mix deps.get
+mix compile
+```
+
+## Usage
+
+To see simple statistics run:
+
+```
+mix run -e "DataOp.print()"
+```
+
+To play with API inside IEx:
+
+```
+iex> {:ok, stats} = DataOP.run()
+iex> DataOp.restaraunts(stats)
+iex> DataOp.total_customers_for(stats, "the-restaurant-at-the-end-of-the-universe")
+```
+
+To generate test data:
+
+```
+mix generate
+mv data.csv priv/
+```
+
+- - -
+
+# Original README
+
+Take a look at the dataset located in `/priv/data.csv`. Your goal is to interpret it and create an API that can answer the following questions:
   - [ ] How many customers visited the "Restaurant at the end of the universe"?
   - [ ] How much money did the "Restaurant at the end of the universe" make?
   - [ ] What was the most popular dish at each restaurant?
